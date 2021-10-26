@@ -1,0 +1,29 @@
+#registerContainer{
+    display: flex;
+    flex-direction: column;
+
+    width: 30%;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    padding: 20px;
+    
+} 
+
+#registerContainer * {
+    width: 80%;
+    margin: 5px 16px 5px 16px;
+} 
+
+#title {
+    color:black;
+    text-align: center;
+    font-family: Helvetica;
+ } 
+
+#subtitle {
+   color:black;
+   text-align: center;
+   font-family: Helvetica;
+   font-size: medium;
+} 
