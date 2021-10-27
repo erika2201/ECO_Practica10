@@ -9,19 +9,22 @@ import {getFirebaseConfig} from "./firebase-config";
 const firebaseAppConfig = getFirebaseConfig();
 const firebaseApp = initializeApp(firebaseAppConfig);
 
+
+//REGISTRAR CANDIDATOS
 //Metodo registrar usuario
-function userRegister (user){
+function candRegister (candidate){
     //Obtener base de datos
     const db = getDatabase();
-    const dbRef = ref(db, 'users/' + user.nombre);
+    const dbRef = ref(db, 'candidates/' + candidate.nombre);
 
-    set(dbRef, user);
+    set(dbRef, candidate);
 }
 
+
 //Metodo para lista de candidatos
-function getUsers(){
+function getCand(){
     const db = getDatabase();
-    const dbRef = ref(db, 'users');
+    const dbRef = ref(db, 'candidates');
 
     //Leer (algo parecido a un observer)
     onValue(dbRef, (snapshot)=>{
@@ -31,19 +34,26 @@ function getUsers(){
     });
 }
 
-
 function currentList(info){
     let text = "";
     //Me da el arreglo de las llaves de un objeto
     Object.keys(info).forEach((k,index)=>{
         console.log(k, index);
-        text += "ID:" +info[k].id1+ " Nombre: " +info[k].nombre + "\n";
+        text += "ID:" +info[k].id1+ "   Nombre: " +info[k].nombre + "\n";
     });
     alert(text);
 }
 
 
+//REGISTRAR VOTOS>>VOTAR XD
+//Metodo registrar votos
+function voteRegister (vote){
+    //Obtener base de datos
+    const db = getDatabase();
+    const dbRef = ref(db, 'votes/' + vote.id2);
 
+    set(dbRef, vote);
+}
 
 //Instancias de los objetos
 const id1 = document.getElementById("id1");
@@ -60,17 +70,28 @@ const voteListBtn = document.getElementById("voteListBtn");
 //Metodo creación del usuario como un objeto
 const eventRegister = (e, event) =>{
     //Creación del objeto, es lo que le envip al firebase
-    console.log("Ingresé aquí");
-    const user = {
+    const candidate = {
         id1: id1.value,
         nombre: nombre.value
     }
-    userRegister(user);
+    candRegister(candidate);
+}
+
+//Metodo creación del voto como un objeto
+const eventVote = (e, event) =>{
+    //Creación del objeto, es lo que le envip al firebase
+    const vote = {
+        id2: id2.value,
+    }
+    voteRegister(vote);
 }
 
 
 //Clicks
 registerBtn.addEventListener('click', eventRegister);
-candListBtn.addEventListener('click', getUsers);
+voteBtn.addEventListener('click',eventVote);
+candListBtn.addEventListener('click', getCand);
+//voteListBtn.addEventListener('click', verVotaciones);
+
 
 
