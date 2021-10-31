@@ -1,6 +1,6 @@
 
 import{initializeApp} from "firebase/app";
-import{getDatabase, ref, set, onValue} from "firebase/database";
+import{getDatabase, ref, set, onValue, get, push} from "firebase/database";
 
 import {getFirebaseConfig} from "./firebase-config";
 
@@ -11,13 +11,23 @@ const firebaseApp = initializeApp(firebaseAppConfig);
 
 
 //REGISTRAR CANDIDATOS
-//Metodo registrar usuario
+//Metodo registrar candidato
 function candRegister (candidate){
     //Obtener base de datos
     const db = getDatabase();
-    const dbRef = ref(db, 'candidates/' + candidate.nombre);
-
-    set(dbRef, candidate);
+    const dbRef = ref(db, 'candidates/' + candidate.id1);
+    
+    get(dbRef).then ((snapshot) => {
+        const data = snapshot.val();
+        //Si no ha sido registrado
+       if(data===null){
+            //Entonces registra
+        set(dbRef, candidate);
+       }else{
+           //sino, avisa que ya está registrado
+        alert("El ID ya ha sido registrado");
+       }
+      });
 }
 
 
@@ -26,12 +36,18 @@ function getCand(){
     const db = getDatabase();
     const dbRef = ref(db, 'candidates');
 
-    //Leer (algo parecido a un observer)
-    onValue(dbRef, (snapshot)=>{
+    get(dbRef).then((snapshot)=>{
         const data = snapshot.val();
-        console.log(data);
-        currentList(data);
+        //Si la lista está vacia
+        if(data===null){
+            //Avisa que está vacia
+            alert("No hay candidatos registrados");    
+        }else{
+            //Sino, muestre la lista
+            currentList(data);
+        }
     });
+
 }
 
 function currentList(info){
@@ -41,7 +57,7 @@ function currentList(info){
         console.log(k, index);
         text += "ID:" +info[k].id1+ "   Nombre: " +info[k].nombre + "\n";
     });
-    alert(text);
+         alert(text);
 }
 
 
@@ -50,9 +66,20 @@ function currentList(info){
 function voteRegister (vote){
     //Obtener base de datos
     const db = getDatabase();
-    const dbRef = ref(db, 'votes/' + vote.id2);
+    const dbRef = push(ref(db, 'votes'));
+    const candRef = ref(db, 'candidates/' + vote.id2);
 
-    set(dbRef, vote);
+    get(candRef).then ((snapshot) => {
+        const data = snapshot.val();
+       //Si vota por uno que no exista 
+       if(data===null){
+           //Avisele que no existe
+        alert("El ID no pertenece a algún candidato");
+       }else{
+           //Sino, guarde el voto
+        set(dbRef, vote);
+       }
+      });
 }
 
 //Instancias de los objetos
@@ -67,23 +94,36 @@ const candListBtn = document.getElementById("candListBtn");
 const voteListBtn = document.getElementById("voteListBtn");
 
 
-//Metodo creación del usuario como un objeto
+//Metodo creación del candidato como un objeto
 const eventRegister = (e, event) =>{
-    //Creación del objeto, es lo que le envip al firebase
-    const candidate = {
-        id1: id1.value,
-        nombre: nombre.value
+    //Si los campos tienen algo
+    if(id1.value!=""||nombre.value!=""){
+        //Cree el objeto, es lo que le envip al firebase
+        const candidate = {
+            id1: id1.value,
+            nombre: nombre.value
+        }
+        candRegister(candidate);
+        id1.value='';
+        nombre.value='';
+    }else{
+        //Sino avise que debe llenar los campos
+        alert("Ingresa todos los campos");
     }
-    candRegister(candidate);
 }
 
 //Metodo creación del voto como un objeto
 const eventVote = (e, event) =>{
-    //Creación del objeto, es lo que le envip al firebase
-    const vote = {
-        id2: id2.value,
+    if(id2.value!=''){
+        //Creación del objeto, es lo que le envip al firebase
+        const vote = {   
+            id2: id2.value,
+        }
+        voteRegister(vote);
+        id2.value='';
+    }else{
+        alert("Ingrese un ID para votar"); 
     }
-    voteRegister(vote);
 }
 
 
@@ -91,7 +131,7 @@ const eventVote = (e, event) =>{
 registerBtn.addEventListener('click', eventRegister);
 voteBtn.addEventListener('click',eventVote);
 candListBtn.addEventListener('click', getCand);
-//voteListBtn.addEventListener('click', verVotaciones);
+//voteListBtn.addEventListener('click', getVotes);
 
 
 
