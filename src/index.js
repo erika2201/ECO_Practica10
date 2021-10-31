@@ -82,6 +82,50 @@ function voteRegister (vote){
       });
 }
 
+
+//Meotods para mostrar los votos
+//Metodo para obtener la lista de votos (y candidatos)
+function getVotes(){
+    const db = getDatabase();
+    const voteRef = ref(db, 'votes');
+    const candRef = ref(db, 'candidates');
+    
+    get(voteRef).then((snapshot)=>{
+        const voteData = snapshot.val();
+        //Si no hay votos
+        if(voteData===null){
+            //Avise que no hay votos
+            alert("No hay votos");    
+        }else{
+            //Sino muestre los resultados
+            const voteTotal = Object.keys(voteData).length;
+        get(candRef).then((snapshot)=>{
+        const candData = snapshot.val();
+        assignVotes(candData,voteData,voteTotal);
+        });  
+        }
+    });
+}
+
+//Asigna los votos al candidato correspondiente
+function assignVotes(candSnap,voteSnap,total){
+   let text = "";
+
+   Object.keys(candSnap).forEach((key, index)=>{
+    let votesIndividual = 0;
+    Object.keys(voteSnap).forEach((keyV, indexV)=>{
+        if (voteSnap[keyV].id2 === candSnap[key].id1){
+            votesIndividual++;
+        }
+    });
+
+    //Sale los resultados de los votos en porcentajeeeee D:
+    let votePercent = votesIndividual/total * 100;
+    text+=(candSnap[key].nombre + " : " + votePercent + "%" + "\n");
+    });
+    alert(text);
+}
+
 //Instancias de los objetos
 const id1 = document.getElementById("id1");
 const nombre = document.getElementById("nombre");
@@ -131,7 +175,7 @@ const eventVote = (e, event) =>{
 registerBtn.addEventListener('click', eventRegister);
 voteBtn.addEventListener('click',eventVote);
 candListBtn.addEventListener('click', getCand);
-//voteListBtn.addEventListener('click', getVotes);
+voteListBtn.addEventListener('click', getVotes);
 
 
 
